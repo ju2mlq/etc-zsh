@@ -1,0 +1,96 @@
+#!/usr/bin/env zsh
+
+bindkey -e
+
+source ~/.zplug/zplug
+
+zplug "ju2mlq/704cd2b79adbc994e13c3ca7d64e1cd4", from:gist
+
+zplug check || zplug install
+zplug load --verbose
+
+#setopt
+setopt appendhistory
+setopt noflowcontrol 
+setopt nolistbeep
+setopt autocd
+setopt autopushd
+setopt extendedglob
+setopt noclobber
+#setopt nounset
+setopt numericglobsort
+setopt pushdminus
+setopt pushdsilent
+setopt pushdtohome
+setopt extendedhistory
+setopt sharehistory
+setopt ignoreeof
+
+## print to screen's status line
+set LAST_CMD
+preexec () {
+    if [[ "$TERM" == "screen" ]]; then
+        ## This code means
+        ## w of (wr) .. to slice every words (separated spaces)
+        ## r of (wr) .. make array index (1,2,3,4,..., something like that)
+        ## ^ .. negate regex.
+        ## So, the total command means:
+        ## return the 1st word which does not match "*=*(like env), -*(like option), sudo, ..., or ssh"
+        LAST_CMD=${1[(wr)^(*=*|-*|sudo|slogin|rlogin|ssh)]}
+
+        ## To avoid over writing of hostname, logging in new host by screen command. 
+        ## and writing the hostname in the parent window name by screen command.
+        if [[ $LAST_CMD != "screen" && $LAST_CMD != "fg" ]]; then
+            echo -ne "\ek${LAST_CMD}(R)\e\\"
+        elif [[ $LAST_CMD != "fg" ]]; then
+            echo -ne "\ek`hostname -s`\e\\"
+        fi
+
+    fi
+}
+
+precmd () {
+	if [[ "$TERM" == "screen" && ${LAST_CMD:=zsh} != "zsh" && $LAST_CMD != "fg" ]]; then
+		echo -ne "\ek(D)${LAST_CMD}\e\\"
+	fi
+}
+
+## original func completion
+if [[ -d $HOME/.zsh/functions ]]; then
+	fpath=( $fpath $HOME/.zsh/functions )
+fi
+
+## default complete 
+autoload -U compinit
+compinit -u
+
+## keybind (emacs like)
+# bindkey -e
+
+## global alias
+alias -g G='|grep'
+alias -g H='|head'
+alias -g L="|${PAGER}"
+alias -g N='2> /dev/null'
+alias -g T='|tail'
+
+## alias
+alias ls='ls -F --color=tty'
+alias l='ls -l'
+alias h='history'
+alias gd='dirs -v; echo "select number: " ; read newdir; cd -"$newdir"'
+alias warp='dirs -v;echo "setnumber:";read num;cd ~-$num'
+alias vi='nvim'
+alias vim='nvim'
+alias tmux='tmux -2'
+
+[[ -e ${HOME}/.dircolors ]] && eval $(dircolors ~/.dircolors/dircolors.ansi-light)
+
+
+## END OF COMMON SETTINGS ##
+
+[[ -f $HOME/.zshrc.$(hostname) ]] && source $HOME/.zshrc.$(hostname)
+
+[[ ! -z "${RANGER_LEVEL}" ]] && export PROMPT="${PROMPT}(in ranger) "
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

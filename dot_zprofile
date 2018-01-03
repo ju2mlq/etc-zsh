@@ -1,0 +1,55 @@
+#!/usr/bin/env zsh
+
+umask 022
+
+setopt promptsubst
+
+## fundamental env
+export PROMPT="$(whoami)@%m "
+export RPROMPT='[%~]'
+export EDITOR='nvim'
+export WWW_HOME='http://www.google.com'
+
+## pager setting
+export PAGER=more
+if [[ -x /usr/bin/lv ]]; then
+  export PAGER=lv
+elif [[ -x /usr/bin/less ]]; then
+  export PAGER=less
+fi
+
+## history setting
+export HISTFILE=~/.zhistory
+export DIRSTACKSIZE=20
+export HISTSIZE=500
+export SAVEHIST=500
+
+## less color setup
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+
+## load paths
+[[ -d ${HOME}/local/bin ]] && export PATH=${HOME}/local/bin:${PATH}
+[[ -d ${HOME}/bin ]] && export PATH=${HOME}/bin:${PATH}
+
+# load anyenv
+if [ -d "${HOME}/.anyenv" ]; then
+  export PATH=${HOME}/.anyenv/bin:${PATH}
+  eval "$(anyenv init - zsh)"
+fi
+
+export GOROOT=$(go env GOROOT)
+export GOPATH="${HOME}/src/lang/golang"
+export PATH=${PATH}:${GOPATH}/bin
+
+
+## platform specific initialize
+[[ -f "${HOME}/.zprofile.$(hostname)" ]] && source "${HOME}/.zprofile.$(hostname)"
+
+## run x
+[[ -z ${DISPLAY} && ${XDG_VTNR} -eq 1 ]] && exec startx
