@@ -54,4 +54,4 @@ export PATH=${PATH}:${GOPATH}/bin
 [[ -f "${HOME}/.zprofile.$(hostname)" ]] && source "${HOME}/.zprofile.$(hostname)"
 
 ## run x
-[[ -z ${DISPLAY} && ${XDG_VTNR} -eq 1 ]] && exec startx
+[[ -z ${DISPLAY} && ${XDG_VTNR} -eq 1 && "${TTY}" = "/dev/tty1" ]] && exec startx
