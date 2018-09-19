@@ -41,12 +41,14 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 if [ -d "${HOME}/.anyenv" ]; then
   export PATH=${HOME}/.anyenv/bin:${PATH}
   eval "$(anyenv init - zsh)"
+  if [ -x $(which yarn) ]; then
+    export PATH="${PATH}:$(yarn global bin)"
+  fi
 fi
 
 export GOROOT=$(go env GOROOT)
 export GOPATH="${HOME}/src/lang/golang"
 export PATH=${PATH}:${GOPATH}/bin
-
 
 ## platform specific initialize
 [[ -f "${HOME}/.zprofile.$(hostname)" ]] && source "${HOME}/.zprofile.$(hostname)"
