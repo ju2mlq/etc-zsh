@@ -5,6 +5,8 @@ bindkey -e
 source ~/.zplug/zplug/init.zsh
 
 zplug "ju2mlq/704cd2b79adbc994e13c3ca7d64e1cd4", from:gist
+zplug "yuki-ycino/tmk", as:command
+zplug "yuki-ycino/tms", as:command
 
 zplug check || zplug install
 
@@ -54,6 +56,32 @@ precmd () {
 	if [[ "$TERM" == "screen" && ${LAST_CMD:=zsh} != "zsh" && $LAST_CMD != "fg" ]]; then
 		echo -ne "\ek(D)${LAST_CMD}\e\\"
 	fi
+}
+
+function f() {
+  local dir repository session current_session
+  dir=$(ghq root)/$(ghq list | fzf --prompt='Project >')
+
+  if [[ $dir != "$(ghq root)/" ]]; then
+    if [[ ! -z ${TMUX} ]]; then
+      repository=${dir##*/}
+      session=${repository//./-}
+      current_session=$(tmux list-sessions | grep 'attached' | cut -d":" -f1)
+
+      if [[ $current_session =~ ^[0-9]+$ ]]; then
+        cd $dir
+        tmux rename-session $session
+      else
+        tmux list-sessions | cut -d":" -f1 | grep $session > /dev/null
+        if [[ $? != 0 ]]; then
+          tmux new-session -d -c $dir -s $session
+        fi
+        tmux switch-client -t $session
+      fi
+    else
+      cd $dir
+    fi
+  fi
 }
 
 ## original func completion
